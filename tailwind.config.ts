@@ -30,12 +30,12 @@ export default {
 					foreground: 'hsl(var(--primary-foreground))'
 				},
                 brand: {
-                    DEFAULT: 'hsl(34, 52%, 54%)', // Amber-Gold
-                    dark: '#c26f1c',
-                    light: '#f8d7a9'
+                    DEFAULT: 'hsl(13, 96%, 40%)', // Deeper red-orange that matches logo
+                    dark: '#b22f00',
+                    light: '#ff8257'
                 },
-                charcoal: '#1a1a1a',
-                softgray: '#f4f4f4',
+                charcoal: '#222222',
+                softgray: '#f8f8f8',
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
