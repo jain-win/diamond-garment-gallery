@@ -84,7 +84,7 @@
 
 @layer components {
   .section-container {
-    @apply container mx-auto px-4 py-16;
+    @apply container mx-auto px-4 py-16 md:py-20;
   }
   
   .section-title {
@@ -101,5 +101,37 @@
   
   .nav-link.active {
     @apply font-semibold;
+  }
+  
+  .btn-primary {
+    @apply bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded-md shadow-sm transition-all font-medium inline-flex items-center justify-center;
+  }
+  
+  .btn-outline {
+    @apply bg-transparent border-2 px-4 py-2 rounded-md shadow-sm transition-all font-medium inline-flex items-center justify-center;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  .image-fallback {
+    @apply bg-gray-200 flex items-center justify-center text-gray-400;
+  }
+  
+  .gallery-masonry {
+    @apply columns-1 sm:columns-2 lg:columns-3 gap-4;
+  }
+  
+  .lightbox {
+    @apply fixed inset-0 bg-black/90 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300;
+  }
+  
+  .lightbox.active {
+    @apply opacity-100 pointer-events-auto;
+  }
+  
+  .lightbox-img {
+    @apply max-w-[90vw] max-h-[90vh] object-contain;
   }
 }

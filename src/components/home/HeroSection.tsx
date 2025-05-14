@@ -10,6 +10,7 @@ const slides = [
     title: 'Hospital Wear',
     description: 'High quality medical uniforms and OT gowns for healthcare professionals',
     image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=880&auto=format&fit=crop',
+    fallbackImage: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=880&auto=format&fit=crop',
     category: 'hospital'
   },
   {
@@ -17,6 +18,7 @@ const slides = [
     title: 'School Uniforms',
     description: 'Comfortable and durable uniforms for students of all age groups',
     image: 'https://images.unsplash.com/photo-1476234251651-f353703a034d?q=80&w=880&auto=format&fit=crop',
+    fallbackImage: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=880&auto=format&fit=crop',
     category: 'school'
   },
   {
@@ -24,6 +26,7 @@ const slides = [
     title: 'Sports Uniforms',
     description: 'Performance-enhancing sportswear for various games and activities',
     image: 'https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=880&auto=format&fit=crop',
+    fallbackImage: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=880&auto=format&fit=crop',
     category: 'sports'
   },
   {
@@ -31,6 +34,7 @@ const slides = [
     title: 'Hotel Uniforms',
     description: 'Elegant and professional outfits for hospitality staff',
     image: 'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?q=80&w=880&auto=format&fit=crop',
+    fallbackImage: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=880&auto=format&fit=crop',
     category: 'hotel'
   },
   {
@@ -38,6 +42,7 @@ const slides = [
     title: 'Industrial Uniforms',
     description: 'Durable workwear designed for safety and comfort in industrial settings',
     image: 'https://images.unsplash.com/photo-1588544609750-6a3c8fbf27af?q=80&w=880&auto=format&fit=crop',
+    fallbackImage: 'https://images.unsplash.com/photo-1618090584126-129cd1f3fbae?w=880&auto=format&fit=crop',
     category: 'industrial'
   },
   {
@@ -45,6 +50,7 @@ const slides = [
     title: 'Scout & NCC',
     description: 'Official uniforms for Scout, Guide, and NCC cadets',
     image: 'https://images.unsplash.com/photo-1588347024214-25215297b426?q=80&w=880&auto=format&fit=crop',
+    fallbackImage: 'https://images.unsplash.com/photo-1529333166437-7feb30b09970?w=880&auto=format&fit=crop',
     category: 'scout'
   }
 ];
@@ -90,7 +96,15 @@ const HeroSection = () => {
             <div key={slide.id} className="swiper-slide relative">
               <div 
                 className="w-full h-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${slide.image})` }}
+                style={{ 
+                  backgroundImage: `url(${slide.image})`,
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover'
+                }}
+                onError={(e: React.SyntheticEvent<HTMLDivElement>) => {
+                  // @ts-ignore - Adding error handler for background image
+                  e.currentTarget.style.backgroundImage = `url(${slide.fallbackImage || 'https://placehold.co/1200x800?text=Diamond+Garment'})`;
+                }}
               >
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                   <div className="text-center px-4 max-w-3xl">
@@ -121,8 +135,8 @@ const HeroSection = () => {
           ))}
         </div>
         <div className="swiper-pagination"></div>
-        <div className="swiper-button-prev"></div>
-        <div className="swiper-button-next"></div>
+        <div className="swiper-button-prev text-white"></div>
+        <div className="swiper-button-next text-white"></div>
       </div>
     </section>
   );
