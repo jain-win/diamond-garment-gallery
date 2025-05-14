@@ -5,6 +5,13 @@ import { ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 // Product categories with images and descriptions
 const categories = [
@@ -60,9 +67,8 @@ const categories = [
 
 const HeroSection = () => {
   const [activeCategory, setActiveCategory] = useState(0);
-  const [autoplay, setAutoplay] = useState<NodeJS.Timeout | null>(null);
-  const [isHovering, setIsHovering] = useState(false);
-  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
+  const [api, setApi] = useState<any>(null);
+  const [current, setCurrent] = useState(0);
   
   // Handle image load errors and fallbacks
   const handleImageError = (categoryId: number) => {
@@ -74,60 +80,27 @@ const HeroSection = () => {
       }
     }
   };
-
-  // Pause autoplay when hovering
-  const handleMouseEnter = () => {
-    setIsHovering(true);
-    if (autoplay) {
-      clearInterval(autoplay);
-      setAutoplay(null);
-    }
-  };
   
-  // Resume autoplay when not hovering
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-    startAutoplay();
-  };
-  
-  // Start the autoplay interval
-  const startAutoplay = () => {
-    const interval = setInterval(() => {
-      setActiveCategory((prev) => (prev + 1) % categories.length);
-    }, 5000);
-    
-    setAutoplay(interval);
-    return interval;
-  };
-  
-  // Handle automatic sliding
   useEffect(() => {
-    const interval = startAutoplay();
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, []);
-  
-  // Navigate to previous slide
-  const prevSlide = () => {
-    if (autoplay) clearInterval(autoplay);
-    setActiveCategory((prev) => (prev - 1 + categories.length) % categories.length);
-    if (!isHovering) startAutoplay();
-  };
-  
-  // Navigate to next slide
-  const nextSlide = () => {
-    if (autoplay) clearInterval(autoplay);
-    setActiveCategory((prev) => (prev + 1) % categories.length);
-    if (!isHovering) startAutoplay();
-  };
-  
+    if (!api) {
+      return;
+    }
+
+    setCurrent(api.selectedScrollSnap());
+    setActiveCategory(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+      setActiveCategory(api.selectedScrollSnap());
+    });
+  }, [api]);
+
   // Click on indicator dot
   const handleSetCategory = (index: number) => {
-    if (autoplay) clearInterval(autoplay);
+    if (api) {
+      api.scrollTo(index);
+    }
     setActiveCategory(index);
-    if (!isHovering) startAutoplay();
   };
 
   return (
@@ -189,76 +162,59 @@ const HeroSection = () => {
           
           {/* Right content - hero carousel */}
           <div className="lg:col-span-7 relative">
-            <div 
-              className="relative rounded-2xl overflow-hidden shadow-2xl"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {/* Image slider */}
-              <div className="relative w-full h-[450px] md:h-[550px]">
-                {categories.map((category, index) => (
-                  <div 
-                    key={category.id}
-                    className={cn(
-                      "absolute inset-0 w-full h-full transition-all duration-1000",
-                      activeCategory === index 
-                        ? "opacity-100 transform scale-100" 
-                        : "opacity-0 transform scale-110"
-                    )}
-                  >
-                    <AspectRatio ratio={16/10} className="h-full">
-                      <img
-                        id={`category-image-${category.id}`}
-                        src={category.image}
-                        alt={category.title}
-                        onError={() => handleImageError(category.id)}
-                        className="w-full h-full object-cover rounded-2xl"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-2xl" />
-                    </AspectRatio>
-                    
-                    {/* Text overlay with staggered animations */}
-                    <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">
-                      <div className={cn(
-                        "transition-all duration-700 transform",
-                        activeCategory === index 
-                          ? "translate-y-0 opacity-100" 
-                          : "translate-y-8 opacity-0"
-                      )}>
-                        <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                          {category.title}
-                        </h3>
-                        <p className="text-white/90 max-w-lg text-lg mb-6">
-                          {category.description}
-                        </p>
-                        <Link 
-                          to={`/products?category=${category.category}`} 
-                          className="inline-flex items-center font-medium text-white bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm transition-all"
-                        >
-                          View Collection <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <Carousel
+                setApi={setApi}
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full"
+              >
+                <CarouselContent>
+                  {categories.map((category) => (
+                    <CarouselItem key={category.id}>
+                      <div className="w-full h-[450px] md:h-[550px] relative">
+                        <AspectRatio ratio={16/10} className="h-full">
+                          <img
+                            id={`category-image-${category.id}`}
+                            src={category.image}
+                            alt={category.title}
+                            onError={() => handleImageError(category.id)}
+                            className="w-full h-full object-cover rounded-2xl"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-2xl" />
+                        </AspectRatio>
+                        
+                        {/* Text overlay with staggered animations */}
+                        <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">
+                          <div className={cn(
+                            "transition-all duration-700 transform",
+                            activeCategory === categories.indexOf(category) 
+                              ? "translate-y-0 opacity-100" 
+                              : "translate-y-8 opacity-0"
+                          )}>
+                            <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                              {category.title}
+                            </h3>
+                            <p className="text-white/90 max-w-lg text-lg mb-6">
+                              {category.description}
+                            </p>
+                            <Link 
+                              to={`/products?category=${category.category}`} 
+                              className="inline-flex items-center font-medium text-white bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm transition-all"
+                            >
+                              View Collection <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Navigation arrows */}
-              <button 
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full backdrop-blur-sm transition-all z-10"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              
-              <button 
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full backdrop-blur-sm transition-all z-10"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-sm z-10" />
+                <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-sm z-10" />
+              </Carousel>
             </div>
             
             {/* Indicator dots */}
