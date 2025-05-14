@@ -7,12 +7,6 @@ import AboutSection from "../components/home/AboutSection";
 import TestimonialsSection from "../components/home/TestimonialsSection";
 import CtaSection from "../components/home/CtaSection";
 
-// Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-
 const Index = () => {
   return (
     <Layout>

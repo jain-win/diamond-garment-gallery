@@ -1,19 +1,13 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
 
-// Import Swiper styles if not imported elsewhere
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-
-const slides = [
+// Product categories with images and descriptions
+const categories = [
   {
     id: 1,
     title: 'Hospital Wear',
@@ -65,129 +59,160 @@ const slides = [
 ];
 
 const HeroSection = () => {
-  const swiperRef = useRef<HTMLDivElement>(null);
-  const swiperInstance = useRef<Swiper | null>(null);
-  const [activeSlide, setActiveSlide] = useState(0);
+  const [activeCategory, setActiveCategory] = useState(0);
+  const [autoplay, setAutoplay] = useState<NodeJS.Timeout | null>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
+  // Handle automatic sliding
   useEffect(() => {
-    if (swiperRef.current) {
-      swiperInstance.current = new Swiper(swiperRef.current, {
-        modules: [Navigation, Pagination, Autoplay, EffectFade],
-        slidesPerView: 1,
-        spaceBetween: 0,
-        loop: true,
-        effect: 'fade', // Add fade effect for smooth transitions
-        speed: 1000, // Slow down the transition
-        autoplay: {
-          delay: 5000,
-          disableOnInteraction: false,
-        },
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-          renderBullet: function(index, className) {
-            return '<span class="' + className + ' w-3 h-3"></span>';
-          },
-        },
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev'
-        },
-        on: {
-          slideChange: function(swiper) {
-            setActiveSlide(swiper.realIndex);
-          }
-        }
-      });
-    }
-
+    const interval = setInterval(() => {
+      setActiveCategory((prev) => (prev + 1) % categories.length);
+    }, 5000);
+    
+    setAutoplay(interval);
+    
     return () => {
-      if (swiperInstance.current) {
-        swiperInstance.current.destroy();
-      }
+      if (autoplay) clearInterval(autoplay);
     };
   }, []);
+  
+  // Reset timer when manually changing
+  const handleSetCategory = (index: number) => {
+    if (autoplay) clearInterval(autoplay);
+    setActiveCategory(index);
+    
+    const newInterval = setInterval(() => {
+      setActiveCategory((prev) => (prev + 1) % categories.length);
+    }, 5000);
+    
+    setAutoplay(newInterval);
+  };
 
   return (
-    <section className="relative w-full h-[85vh] md:h-[90vh] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/50 z-10"></div>
-      
-      <div ref={swiperRef} className="swiper h-full w-full">
-        <div className="swiper-wrapper">
-          {slides.map((slide, index) => (
-            <div key={slide.id} className="swiper-slide relative">
-              <div 
-                className={cn(
-                  "w-full h-full bg-cover bg-center transform transition-transform duration-1000",
-                  activeSlide === index ? "scale-105" : "scale-100"
-                )}
-                style={{ 
-                  backgroundImage: `url(${slide.image})`,
-                  backgroundPosition: 'center',
-                  backgroundSize: 'cover',
-                }}
-                onError={(e: React.SyntheticEvent<HTMLDivElement>) => {
-                  // @ts-ignore - Adding error handler for background image
-                  e.currentTarget.style.backgroundImage = `url(${slide.fallbackImage || 'https://placehold.co/1200x800?text=Diamond+Garment'})`;
-                }}
-              >
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                  <div className="text-center px-4 max-w-4xl z-20">
-                    <h1 
-                      className={cn(
-                        "text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4", 
-                        "opacity-0 transform -translate-y-10 transition-all duration-1000",
-                        activeSlide === index && "opacity-100 translate-y-0"
-                      )}
-                    >
-                      {slide.title}
-                    </h1>
-                    <p 
-                      className={cn(
-                        "text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto",
-                        "opacity-0 transform -translate-y-6 transition-all duration-1000 delay-300",
-                        activeSlide === index && "opacity-100 translate-y-0"
-                      )}
-                    >
-                      {slide.description}
+    <section className="relative bg-gradient-to-br from-brand/5 via-background to-background overflow-hidden min-h-[85vh]">
+      <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 z-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 800 800">
+            <defs>
+              <pattern id="pattern-circles" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
+                <circle id="pattern-circle" cx="10" cy="10" r="1.6257413380501518" fill="#000"></circle>
+              </pattern>
+            </defs>
+            <rect fill="url(#pattern-circles)" width="100%" height="100%"></rect>
+          </svg>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-12 md:py-24 relative z-10">
+        <div className="grid lg:grid-cols-7 items-center gap-8">
+          {/* Left content - text and buttons */}
+          <div className="lg:col-span-3 space-y-6 text-center lg:text-left">
+            <div className="inline-block">
+              <span className="inline-flex items-center rounded-full bg-brand/10 px-4 py-1 text-sm font-medium text-brand ring-1 ring-inset ring-brand/20">
+                Diamond Garment
+              </span>
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+              <span className="block">Professional</span>
+              <span className="block mt-1 text-brand">Uniform Solutions</span>
+            </h1>
+            
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
+              Crafting high-quality uniforms for schools, hospitals, hotels, industrial needs, and more since 1982.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button asChild size="lg" className="rounded-full px-8">
+                <Link to="/products">
+                  Explore Products <ArrowRight className="ml-2" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="rounded-full px-8">
+                <Link to="/contact">
+                  Contact Us
+                </Link>
+              </Button>
+            </div>
+          </div>
+          
+          {/* Right content - carousel */}
+          <div className="lg:col-span-4 relative">
+            <div className="relative rounded-xl overflow-hidden shadow-2xl">
+              {/* Active image with animation */}
+              {categories.map((category, index) => (
+                <div 
+                  key={category.id}
+                  className={cn(
+                    "absolute inset-0 w-full h-full transition-all duration-700",
+                    activeCategory === index 
+                      ? "opacity-100 scale-100" 
+                      : "opacity-0 scale-105"
+                  )}
+                >
+                  {/* Background image */}
+                  <div 
+                    className="w-full h-[400px] md:h-[500px] bg-cover bg-center transition-transform duration-7000"
+                    style={{ 
+                      backgroundImage: `url(${category.image})`,
+                      backgroundPosition: 'center',
+                      backgroundSize: 'cover',
+                    }}
+                  />
+                  
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20 flex flex-col justify-end p-6 md:p-8">
+                    <h3 className={cn(
+                      "text-2xl md:text-3xl font-bold text-white transition-all duration-500 transform",
+                      activeCategory === index ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
+                    )}>
+                      {category.title}
+                    </h3>
+                    <p className={cn(
+                      "text-white/80 mt-2 max-w-md transition-all duration-500 delay-100 transform",
+                      activeCategory === index ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
+                    )}>
+                      {category.description}
                     </p>
-                    <div 
-                      className={cn(
-                        "flex flex-col sm:flex-row justify-center gap-4",
-                        "opacity-0 transform -translate-y-4 transition-all duration-1000 delay-500",
-                        activeSlide === index && "opacity-100 translate-y-0"
-                      )}
-                    >
+                    <div className={cn(
+                      "mt-4 transition-all duration-500 delay-200 transform",
+                      activeCategory === index ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
+                    )}>
                       <Link 
-                        to={`/products?category=${slide.category}`} 
-                        className="btn-primary group relative overflow-hidden px-8 py-3 rounded-full"
+                        to={`/products?category=${category.category}`} 
+                        className="inline-flex items-center font-medium text-white hover:text-brand transition-colors"
                       >
-                        <span className="relative z-10">View Products</span>
-                        <span className="absolute inset-0 bg-brand-dark transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
-                        <ArrowRight className="inline-block ml-2 transform group-hover:translate-x-1 transition-transform" size={18} />
-                      </Link>
-                      <Link 
-                        to="/contact" 
-                        className="btn-outline border-2 border-white text-white hover:bg-white hover:text-charcoal transition-all duration-300 px-8 py-3 rounded-full"
-                      >
-                        Enquire Now
+                        View Collection <ArrowRight className="ml-1 h-4 w-4" />
                       </Link>
                     </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
+            
+            {/* Indicator dots */}
+            <div className="flex justify-center mt-4">
+              {categories.map((category, index) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleSetCategory(index)}
+                  className={cn(
+                    "w-3 h-3 rounded-full mx-1 transition-all duration-300",
+                    activeCategory === index 
+                      ? "bg-brand scale-110" 
+                      : "bg-gray-300 hover:bg-gray-400"
+                  )}
+                  aria-label={`View ${category.title}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-        
-        {/* Enhanced pagination and navigation */}
-        <div className="swiper-pagination bottom-8"></div>
-        <div className="swiper-button-prev text-white opacity-70 hover:opacity-100 transition-opacity left-8"></div>
-        <div className="swiper-button-next text-white opacity-70 hover:opacity-100 transition-opacity right-8"></div>
       </div>
       
-      {/* Hero bottom glow effect */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent z-20"></div>
+      {/* Decorative elements */}
+      <div className="absolute -bottom-6 -left-24 w-64 h-64 bg-brand/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-12 -right-12 w-32 h-32 bg-brand/5 rounded-full blur-xl"></div>
     </section>
   );
 };
