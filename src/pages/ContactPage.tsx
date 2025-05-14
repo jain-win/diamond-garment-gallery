@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -92,7 +91,20 @@ const ContactPage = () => {
     if (validateForm()) {
       setIsSubmitting(true);
       
-      // Simulate form submission
+      // In a real app, this would be an API call to save the form to a database
+      // For our demo, we'll simulate this and store in localStorage
+      const submissions = JSON.parse(localStorage.getItem('contactSubmissions') || '[]');
+      const newSubmission = {
+        ...formValues,
+        id: Date.now().toString(),
+        status: 'new',
+        date: new Date().toISOString()
+      };
+      
+      submissions.push(newSubmission);
+      localStorage.setItem('contactSubmissions', JSON.stringify(submissions));
+      
+      // Simulate form submission delay
       setTimeout(() => {
         setIsSubmitting(false);
         toast({
@@ -108,7 +120,7 @@ const ContactPage = () => {
           product: '',
           message: '',
         });
-      }, 1500);
+      }, 1000);
     }
   };
   
