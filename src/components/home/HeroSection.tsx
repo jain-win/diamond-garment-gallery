@@ -1,10 +1,11 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Image } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 // Product categories with images and descriptions
 const categories = [
@@ -62,6 +63,18 @@ const HeroSection = () => {
   const [activeCategory, setActiveCategory] = useState(0);
   const [autoplay, setAutoplay] = useState<NodeJS.Timeout | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
+  
+  // Handle image load errors and fallbacks
+  const handleImageError = (categoryId: number) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    if (category) {
+      const img = document.getElementById(`category-image-${categoryId}`) as HTMLImageElement;
+      if (img && category.fallbackImage) {
+        img.src = category.fallbackImage;
+      }
+    }
+  };
 
   // Handle automatic sliding
   useEffect(() => {
@@ -150,15 +163,19 @@ const HeroSection = () => {
                       : "opacity-0 scale-105"
                   )}
                 >
-                  {/* Background image */}
-                  <div 
-                    className="w-full h-[400px] md:h-[500px] bg-cover bg-center transition-transform duration-7000"
-                    style={{ 
-                      backgroundImage: `url(${category.image})`,
-                      backgroundPosition: 'center',
-                      backgroundSize: 'cover',
-                    }}
-                  />
+                  {/* Background image with proper error handling */}
+                  <div className="w-full h-[400px] md:h-[500px] relative">
+                    <AspectRatio ratio={16/9} className="h-full">
+                      <img
+                        id={`category-image-${category.id}`}
+                        src={category.image}
+                        alt={category.title}
+                        onError={() => handleImageError(category.id)}
+                        className="w-full h-full object-cover rounded-xl"
+                      />
+                      <div className="absolute inset-0 bg-black/20 rounded-xl"></div>
+                    </AspectRatio>
+                  </div>
                   
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20 flex flex-col justify-end p-6 md:p-8">
