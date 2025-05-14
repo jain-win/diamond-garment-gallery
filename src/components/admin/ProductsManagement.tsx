@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Table,
@@ -28,8 +27,8 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 // We'll use this for our mock data and editing
 const ProductsManagement = () => {
   // In a real application, this data would come from your database
-  // We're using the imported data from the data file here
-  const [products, setProducts] = useState<Product[]>([...categories[0].products]);
+  // We're using the first category's products as initial data
+  const [products, setProducts] = useState<Product[]>(categories.length > 0 ? [...categories[0].products] : []);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -56,10 +55,10 @@ const ProductsManagement = () => {
     // In a real app, this would send a request to your API
     const newProduct = {
       ...formData,
-      id: Date.now().toString(),
-    };
+      id: parseInt(Date.now().toString()),
+    } as Product;
 
-    setProducts([...products, newProduct as Product]);
+    setProducts([...products, newProduct]);
     setIsAddDialogOpen(false);
     resetForm();
 
@@ -74,7 +73,7 @@ const ProductsManagement = () => {
     if (!currentProduct) return;
 
     const updatedProducts = products.map(product => 
-      product.id === currentProduct.id ? { ...formData, id: product.id } as Product : product
+      product.id === currentProduct.id ? { ...formData, id: parseInt(formData.id) } as Product : product
     );
 
     setProducts(updatedProducts);
@@ -104,7 +103,7 @@ const ProductsManagement = () => {
   const openEditDialog = (product: Product) => {
     setCurrentProduct(product);
     setFormData({
-      id: product.id,
+      id: product.id.toString(),
       name: product.name,
       description: product.description,
       image: product.image,

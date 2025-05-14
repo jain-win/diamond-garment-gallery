@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,13 +45,12 @@ const GalleryManagement = () => {
   };
 
   const handleAddImage = () => {
-    // In a real app, this would send a request to your API
     const newImage = {
       ...formData,
-      id: Date.now().toString(),
-    };
+      id: parseInt(Date.now().toString()),
+    } as GalleryImage;
 
-    setImages([...images, newImage as GalleryImage]);
+    setImages([...images, newImage]);
     setIsAddDialogOpen(false);
     resetForm();
 
@@ -63,11 +61,10 @@ const GalleryManagement = () => {
   };
 
   const handleEditImage = () => {
-    // In a real app, this would send a request to your API
     if (!currentImage) return;
 
     const updatedImages = images.map(img => 
-      img.id === currentImage.id ? { ...formData, id: img.id } as GalleryImage : img
+      img.id === currentImage.id ? { ...formData, id: parseInt(formData.id) } as GalleryImage : img
     );
 
     setImages(updatedImages);
@@ -81,7 +78,6 @@ const GalleryManagement = () => {
   };
 
   const handleDeleteImage = () => {
-    // In a real app, this would send a request to your API
     if (!currentImage) return;
 
     const filteredImages = images.filter(img => img.id !== currentImage.id);
@@ -97,7 +93,7 @@ const GalleryManagement = () => {
   const openEditDialog = (image: GalleryImage) => {
     setCurrentImage(image);
     setFormData({
-      id: image.id,
+      id: image.id.toString(),
       title: image.title,
       image: image.image,
       category: image.category
@@ -167,7 +163,6 @@ const GalleryManagement = () => {
           </Select>
         </div>
         
-        {/* Gallery Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredImages.map((image) => (
             <div key={image.id} className="bg-white rounded-md shadow-md overflow-hidden">
@@ -232,7 +227,6 @@ const GalleryManagement = () => {
         </div>
       </Tabs>
 
-      {/* Add Image Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -303,7 +297,6 @@ const GalleryManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Image Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -374,7 +367,6 @@ const GalleryManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
