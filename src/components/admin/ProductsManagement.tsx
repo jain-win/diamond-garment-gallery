@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import {
   Table,
@@ -20,15 +21,15 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/hooks/use-toast';
-import { categories, type Product } from '@/data/products';
+import { categories, products, type Product } from '@/data/products';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 // We'll use this for our mock data and editing
 const ProductsManagement = () => {
   // In a real application, this data would come from your database
-  // We're using the first category's products as initial data
-  const [products, setProducts] = useState<Product[]>(categories.length > 0 ? [...categories[0].products] : []);
+  // We're using the products array as initial data
+  const [productsState, setProductsState] = useState<Product[]>(products);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -55,10 +56,10 @@ const ProductsManagement = () => {
     // In a real app, this would send a request to your API
     const newProduct = {
       ...formData,
-      id: parseInt(Date.now().toString()),
+      id: Date.now(),
     } as Product;
 
-    setProducts([...products, newProduct]);
+    setProductsState([...productsState, newProduct]);
     setIsAddDialogOpen(false);
     resetForm();
 
@@ -72,11 +73,11 @@ const ProductsManagement = () => {
     // In a real app, this would send a request to your API
     if (!currentProduct) return;
 
-    const updatedProducts = products.map(product => 
+    const updatedProducts = productsState.map(product => 
       product.id === currentProduct.id ? { ...formData, id: parseInt(formData.id) } as Product : product
     );
 
-    setProducts(updatedProducts);
+    setProductsState(updatedProducts);
     setIsEditDialogOpen(false);
     resetForm();
 
@@ -90,8 +91,8 @@ const ProductsManagement = () => {
     // In a real app, this would send a request to your API
     if (!currentProduct) return;
 
-    const filteredProducts = products.filter(product => product.id !== currentProduct.id);
-    setProducts(filteredProducts);
+    const filteredProducts = productsState.filter(product => product.id !== currentProduct.id);
+    setProductsState(filteredProducts);
     setIsDeleteDialogOpen(false);
 
     toast({
@@ -159,8 +160,8 @@ const ProductsManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.length > 0 ? (
-              products.map((product) => (
+            {productsState.length > 0 ? (
+              productsState.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
                     <div className="w-12 h-12 overflow-hidden rounded-md">
