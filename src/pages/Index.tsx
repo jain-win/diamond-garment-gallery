@@ -7,6 +7,9 @@ import AboutSection from "../components/home/AboutSection";
 import TestimonialsSection from "../components/home/TestimonialsSection";
 import CtaSection from "../components/home/CtaSection";
 
+// Add grid pattern for background
+import "../styles/grid-pattern.css";
+
 const Index = () => {
   return (
     <Layout>

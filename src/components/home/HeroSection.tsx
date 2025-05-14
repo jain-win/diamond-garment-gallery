@@ -1,9 +1,8 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Image } from 'lucide-react';
+import { ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
@@ -62,7 +61,7 @@ const categories = [
 const HeroSection = () => {
   const [activeCategory, setActiveCategory] = useState(0);
   const [autoplay, setAutoplay] = useState<NodeJS.Timeout | null>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
   
   // Handle image load errors and fallbacks
@@ -76,72 +75,111 @@ const HeroSection = () => {
     }
   };
 
-  // Handle automatic sliding
-  useEffect(() => {
+  // Pause autoplay when hovering
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+    if (autoplay) {
+      clearInterval(autoplay);
+      setAutoplay(null);
+    }
+  };
+  
+  // Resume autoplay when not hovering
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    startAutoplay();
+  };
+  
+  // Start the autoplay interval
+  const startAutoplay = () => {
     const interval = setInterval(() => {
       setActiveCategory((prev) => (prev + 1) % categories.length);
     }, 5000);
     
     setAutoplay(interval);
+    return interval;
+  };
+  
+  // Handle automatic sliding
+  useEffect(() => {
+    const interval = startAutoplay();
     
     return () => {
-      if (autoplay) clearInterval(autoplay);
+      if (interval) clearInterval(interval);
     };
   }, []);
   
-  // Reset timer when manually changing
+  // Navigate to previous slide
+  const prevSlide = () => {
+    if (autoplay) clearInterval(autoplay);
+    setActiveCategory((prev) => (prev - 1 + categories.length) % categories.length);
+    if (!isHovering) startAutoplay();
+  };
+  
+  // Navigate to next slide
+  const nextSlide = () => {
+    if (autoplay) clearInterval(autoplay);
+    setActiveCategory((prev) => (prev + 1) % categories.length);
+    if (!isHovering) startAutoplay();
+  };
+  
+  // Click on indicator dot
   const handleSetCategory = (index: number) => {
     if (autoplay) clearInterval(autoplay);
     setActiveCategory(index);
-    
-    const newInterval = setInterval(() => {
-      setActiveCategory((prev) => (prev + 1) % categories.length);
-    }, 5000);
-    
-    setAutoplay(newInterval);
+    if (!isHovering) startAutoplay();
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-brand/5 via-background to-background overflow-hidden min-h-[85vh]">
-      <div className="absolute inset-0 w-full h-full">
-        <div className="absolute inset-0 z-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 800 800">
-            <defs>
-              <pattern id="pattern-circles" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
-                <circle id="pattern-circle" cx="10" cy="10" r="1.6257413380501518" fill="#000"></circle>
-              </pattern>
-            </defs>
-            <rect fill="url(#pattern-circles)" width="100%" height="100%"></rect>
-          </svg>
-        </div>
+    <section className="relative overflow-hidden min-h-[90vh] bg-gradient-to-b from-background to-slate-50/50 flex items-center">
+      {/* Background pattern */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute h-[500px] w-[500px] -top-[250px] -right-[250px] bg-brand/5 rounded-full blur-3xl" />
+        <div className="absolute h-[400px] w-[400px] top-[50%] -left-[200px] bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute h-[300px] w-[300px] -bottom-[150px] right-[10%] bg-purple-500/5 rounded-full blur-3xl" />
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.015]" />
       </div>
 
-      <div className="container mx-auto px-4 py-12 md:py-24 relative z-10">
-        <div className="grid lg:grid-cols-7 items-center gap-8">
-          {/* Left content - text and buttons */}
-          <div className="lg:col-span-3 space-y-6 text-center lg:text-left">
-            <div className="inline-block">
-              <span className="inline-flex items-center rounded-full bg-brand/10 px-4 py-1 text-sm font-medium text-brand ring-1 ring-inset ring-brand/20">
-                Diamond Garment
+      <div className="container mx-auto px-4 py-8 md:py-16 z-10 relative">
+        <div className="grid lg:grid-cols-12 gap-8 items-center">
+          {/* Left content - animated headings and CTA */}
+          <div className="lg:col-span-5 space-y-6 text-center lg:text-left">
+            <div className="overflow-hidden">
+              <span className="inline-flex items-center rounded-full bg-brand/10 px-4 py-1 text-sm font-medium text-brand ring-1 ring-inset ring-brand/20 animate-fade-in">
+                Premium Quality Since 1982
               </span>
             </div>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-              <span className="block">Professional</span>
-              <span className="block mt-1 text-brand">Uniform Solutions</span>
-            </h1>
+            <div className="space-y-2">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+                <span className="block overflow-hidden">
+                  <span className="block transform transition-transform duration-700 animate-slide-in">
+                    Professional
+                  </span>
+                </span>
+                <span className="block mt-1 text-brand overflow-hidden">
+                  <span className="block transform transition-transform duration-700 delay-100 animate-slide-in">
+                    Uniform Solutions
+                  </span>
+                </span>
+              </h1>
+              
+              <div className="overflow-hidden">
+                <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 transform transition-transform duration-700 delay-200 animate-slide-in">
+                  Crafting high-quality uniforms for schools, hospitals, hotels, industrial needs, and more since 1982.
+                </p>
+              </div>
+            </div>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              Crafting high-quality uniforms for schools, hospitals, hotels, industrial needs, and more since 1982.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button asChild size="lg" className="rounded-full px-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 transform transition-all duration-700 delay-300 animate-fade-in">
+              <Button asChild size="lg" className="rounded-full px-8 shadow-lg hover:shadow-brand/20 hover:scale-105 transition-all">
                 <Link to="/products">
-                  Explore Products <ArrowRight className="ml-2" />
+                  Explore Products <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full px-8">
+              <Button asChild variant="outline" size="lg" className="rounded-full px-8 hover:bg-brand/10 hover:text-brand hover:border-brand/20 transition-all">
                 <Link to="/contact">
                   Contact Us
                 </Link>
@@ -149,74 +187,90 @@ const HeroSection = () => {
             </div>
           </div>
           
-          {/* Right content - carousel */}
-          <div className="lg:col-span-4 relative">
-            <div className="relative rounded-xl overflow-hidden shadow-2xl">
-              {/* Active image with animation */}
-              {categories.map((category, index) => (
-                <div 
-                  key={category.id}
-                  className={cn(
-                    "absolute inset-0 w-full h-full transition-all duration-700",
-                    activeCategory === index 
-                      ? "opacity-100 scale-100" 
-                      : "opacity-0 scale-105"
-                  )}
-                >
-                  {/* Background image with proper error handling */}
-                  <div className="w-full h-[400px] md:h-[500px] relative">
-                    <AspectRatio ratio={16/9} className="h-full">
+          {/* Right content - hero carousel */}
+          <div className="lg:col-span-7 relative">
+            <div 
+              className="relative rounded-2xl overflow-hidden shadow-2xl"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              {/* Image slider */}
+              <div className="relative w-full h-[450px] md:h-[550px]">
+                {categories.map((category, index) => (
+                  <div 
+                    key={category.id}
+                    className={cn(
+                      "absolute inset-0 w-full h-full transition-all duration-1000",
+                      activeCategory === index 
+                        ? "opacity-100 transform scale-100" 
+                        : "opacity-0 transform scale-110"
+                    )}
+                  >
+                    <AspectRatio ratio={16/10} className="h-full">
                       <img
                         id={`category-image-${category.id}`}
                         src={category.image}
                         alt={category.title}
                         onError={() => handleImageError(category.id)}
-                        className="w-full h-full object-cover rounded-xl"
+                        className="w-full h-full object-cover rounded-2xl"
                       />
-                      <div className="absolute inset-0 bg-black/20 rounded-xl"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-2xl" />
                     </AspectRatio>
-                  </div>
-                  
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20 flex flex-col justify-end p-6 md:p-8">
-                    <h3 className={cn(
-                      "text-2xl md:text-3xl font-bold text-white transition-all duration-500 transform",
-                      activeCategory === index ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
-                    )}>
-                      {category.title}
-                    </h3>
-                    <p className={cn(
-                      "text-white/80 mt-2 max-w-md transition-all duration-500 delay-100 transform",
-                      activeCategory === index ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
-                    )}>
-                      {category.description}
-                    </p>
-                    <div className={cn(
-                      "mt-4 transition-all duration-500 delay-200 transform",
-                      activeCategory === index ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
-                    )}>
-                      <Link 
-                        to={`/products?category=${category.category}`} 
-                        className="inline-flex items-center font-medium text-white hover:text-brand transition-colors"
-                      >
-                        View Collection <ArrowRight className="ml-1 h-4 w-4" />
-                      </Link>
+                    
+                    {/* Text overlay with staggered animations */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">
+                      <div className={cn(
+                        "transition-all duration-700 transform",
+                        activeCategory === index 
+                          ? "translate-y-0 opacity-100" 
+                          : "translate-y-8 opacity-0"
+                      )}>
+                        <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                          {category.title}
+                        </h3>
+                        <p className="text-white/90 max-w-lg text-lg mb-6">
+                          {category.description}
+                        </p>
+                        <Link 
+                          to={`/products?category=${category.category}`} 
+                          className="inline-flex items-center font-medium text-white bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm transition-all"
+                        >
+                          View Collection <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              
+              {/* Navigation arrows */}
+              <button 
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full backdrop-blur-sm transition-all z-10"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              
+              <button 
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full backdrop-blur-sm transition-all z-10"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
             
             {/* Indicator dots */}
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-6 gap-2">
               {categories.map((category, index) => (
                 <button
                   key={category.id}
                   onClick={() => handleSetCategory(index)}
                   className={cn(
-                    "w-3 h-3 rounded-full mx-1 transition-all duration-300",
+                    "w-3 h-3 rounded-full transition-all duration-300",
                     activeCategory === index 
-                      ? "bg-brand scale-110" 
+                      ? "bg-brand w-8" 
                       : "bg-gray-300 hover:bg-gray-400"
                   )}
                   aria-label={`View ${category.title}`}
@@ -226,10 +280,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-      
-      {/* Decorative elements */}
-      <div className="absolute -bottom-6 -left-24 w-64 h-64 bg-brand/10 rounded-full blur-3xl"></div>
-      <div className="absolute top-12 -right-12 w-32 h-32 bg-brand/5 rounded-full blur-xl"></div>
     </section>
   );
 };
