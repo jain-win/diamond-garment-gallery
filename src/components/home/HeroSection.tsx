@@ -1,8 +1,17 @@
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import { ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+
+// Import Swiper styles if not imported elsewhere
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 const slides = [
   {
@@ -58,25 +67,36 @@ const slides = [
 const HeroSection = () => {
   const swiperRef = useRef<HTMLDivElement>(null);
   const swiperInstance = useRef<Swiper | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
     if (swiperRef.current) {
       swiperInstance.current = new Swiper(swiperRef.current, {
-        modules: [Navigation, Pagination, Autoplay],
+        modules: [Navigation, Pagination, Autoplay, EffectFade],
         slidesPerView: 1,
         spaceBetween: 0,
         loop: true,
+        effect: 'fade', // Add fade effect for smooth transitions
+        speed: 1000, // Slow down the transition
         autoplay: {
           delay: 5000,
           disableOnInteraction: false,
         },
         pagination: {
           el: '.swiper-pagination',
-          clickable: true
+          clickable: true,
+          renderBullet: function(index, className) {
+            return '<span class="' + className + ' w-3 h-3"></span>';
+          },
         },
         navigation: {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev'
+        },
+        on: {
+          slideChange: function(swiper) {
+            setActiveSlide(swiper.realIndex);
+          }
         }
       });
     }
@@ -89,41 +109,66 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative w-full h-[80vh] md:h-[90vh]">
+    <section className="relative w-full h-[85vh] md:h-[90vh] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/50 z-10"></div>
+      
       <div ref={swiperRef} className="swiper h-full w-full">
         <div className="swiper-wrapper">
-          {slides.map((slide) => (
+          {slides.map((slide, index) => (
             <div key={slide.id} className="swiper-slide relative">
               <div 
-                className="w-full h-full bg-cover bg-center"
+                className={cn(
+                  "w-full h-full bg-cover bg-center transform transition-transform duration-1000",
+                  activeSlide === index ? "scale-105" : "scale-100"
+                )}
                 style={{ 
                   backgroundImage: `url(${slide.image})`,
                   backgroundPosition: 'center',
-                  backgroundSize: 'cover'
+                  backgroundSize: 'cover',
                 }}
                 onError={(e: React.SyntheticEvent<HTMLDivElement>) => {
                   // @ts-ignore - Adding error handler for background image
                   e.currentTarget.style.backgroundImage = `url(${slide.fallbackImage || 'https://placehold.co/1200x800?text=Diamond+Garment'})`;
                 }}
               >
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <div className="text-center px-4 max-w-3xl">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fade-in">
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                  <div className="text-center px-4 max-w-4xl z-20">
+                    <h1 
+                      className={cn(
+                        "text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4", 
+                        "opacity-0 transform -translate-y-10 transition-all duration-1000",
+                        activeSlide === index && "opacity-100 translate-y-0"
+                      )}
+                    >
                       {slide.title}
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-200 mb-8 animate-slide-in">
+                    <p 
+                      className={cn(
+                        "text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto",
+                        "opacity-0 transform -translate-y-6 transition-all duration-1000 delay-300",
+                        activeSlide === index && "opacity-100 translate-y-0"
+                      )}
+                    >
                       {slide.description}
                     </p>
-                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <div 
+                      className={cn(
+                        "flex flex-col sm:flex-row justify-center gap-4",
+                        "opacity-0 transform -translate-y-4 transition-all duration-1000 delay-500",
+                        activeSlide === index && "opacity-100 translate-y-0"
+                      )}
+                    >
                       <Link 
                         to={`/products?category=${slide.category}`} 
-                        className="btn-primary"
+                        className="btn-primary group relative overflow-hidden px-8 py-3 rounded-full"
                       >
-                        View Products
+                        <span className="relative z-10">View Products</span>
+                        <span className="absolute inset-0 bg-brand-dark transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
+                        <ArrowRight className="inline-block ml-2 transform group-hover:translate-x-1 transition-transform" size={18} />
                       </Link>
                       <Link 
                         to="/contact" 
-                        className="btn-outline border-white text-white hover:bg-white hover:text-charcoal"
+                        className="btn-outline border-2 border-white text-white hover:bg-white hover:text-charcoal transition-all duration-300 px-8 py-3 rounded-full"
                       >
                         Enquire Now
                       </Link>
@@ -134,10 +179,15 @@ const HeroSection = () => {
             </div>
           ))}
         </div>
-        <div className="swiper-pagination"></div>
-        <div className="swiper-button-prev text-white"></div>
-        <div className="swiper-button-next text-white"></div>
+        
+        {/* Enhanced pagination and navigation */}
+        <div className="swiper-pagination bottom-8"></div>
+        <div className="swiper-button-prev text-white opacity-70 hover:opacity-100 transition-opacity left-8"></div>
+        <div className="swiper-button-next text-white opacity-70 hover:opacity-100 transition-opacity right-8"></div>
       </div>
+      
+      {/* Hero bottom glow effect */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent z-20"></div>
     </section>
   );
 };
