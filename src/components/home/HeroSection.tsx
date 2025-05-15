@@ -183,26 +183,27 @@ const HeroSection = () => {
                             onError={() => handleImageError(category.id)}
                             className="w-full h-full object-cover rounded-2xl"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-2xl" />
+                          {/* Updated gradient overlay for better text visibility */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20 rounded-2xl" />
                         </AspectRatio>
                         
-                        {/* Text overlay with staggered animations */}
+                        {/* Text overlay with improved visibility */}
                         <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">
                           <div className={cn(
-                            "transition-all duration-700 transform",
+                            "transition-all duration-700 transform backdrop-blur-sm bg-black/20 p-6 rounded-xl",
                             activeCategory === categories.indexOf(category) 
                               ? "translate-y-0 opacity-100" 
                               : "translate-y-8 opacity-0"
                           )}>
-                            <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                            <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-md">
                               {category.title}
                             </h3>
-                            <p className="text-white/90 max-w-lg text-lg mb-6">
+                            <p className="text-white/95 max-w-lg text-lg mb-6 drop-shadow-md">
                               {category.description}
                             </p>
                             <Link 
                               to={`/products?category=${category.category}`} 
-                              className="inline-flex items-center font-medium text-white bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm transition-all"
+                              className="inline-flex items-center font-medium text-white bg-brand/80 hover:bg-brand px-6 py-3 rounded-full backdrop-blur-sm transition-all shadow-md"
                             >
                               View Collection <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
@@ -212,8 +213,8 @@ const HeroSection = () => {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-sm z-10" />
-                <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-sm z-10" />
+                <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white backdrop-blur-sm z-10 shadow-md" />
+                <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white backdrop-blur-sm z-10 shadow-md" />
               </Carousel>
             </div>
             
